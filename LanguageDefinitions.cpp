@@ -75,108 +75,60 @@ static bool TokenizeCStyleIdentifier(const char* in_begin, const char* in_end, c
 	return false;
 }
 
-static bool TokenizeCStyleNumber(const char* in_begin, const char* in_end, const char*& out_begin, const char*& out_end)
+
+static bool TokenizeX86StyleNumber(const char* in_begin, const char* in_end, const char*& out_begin, const char*& out_end)
 {
-	const char* p = in_begin;
+    const char* p = in_begin;
 
-	const bool startsWithNumber = *p >= '0' && *p <= '9';
+    const bool startsWithNumber = *p >= '0' && *p <= '9';
 
-	if (*p != '+' && *p != '-' && !startsWithNumber)
-		return false;
+    if (*p != '+' && *p != '-' && !startsWithNumber)
+        return false;
 
-	p++;
+    p++;
 
-	bool hasNumber = startsWithNumber;
+    bool hasNumber = startsWithNumber;
 
-	while (p < in_end && (*p >= '0' && *p <= '9'))
-	{
-		hasNumber = true;
+    while (p < in_end && (*p >= '0' && *p <= '9'))
+    {
+        hasNumber = true;
 
-		p++;
-	}
+        p++;
+    }
 
-	if (hasNumber == false)
-		return false;
+    if (hasNumber == false)
+        return false;
 
-	bool isFloat = false;
-	bool isHex = false;
-	bool isBinary = false;
+    bool isFloat = false;
+    bool isHex = false;
+    bool isBinary = false;
 
-	if (p < in_end)
-	{
-		if (*p == '.')
-		{
-			isFloat = true;
+    if (p < in_end)
+    {
+        if (*p == '.')
+        {
+            isFloat = true;
+            p++;
 
-			p++;
+            while (p < in_end && (*p >= '0' && *p <= '9'))
+                p++;
+        }
+        else if (*p == 'x' || *p == 'X')
+        {
+            // hex formatted integer of the type 0xef80
 
-			while (p < in_end && (*p >= '0' && *p <= '9'))
-				p++;
-		}
-		else if (*p == 'x' || *p == 'X')
-		{
-			// hex formatted integer of the type 0xef80
+            isHex = true;
 
-			isHex = true;
+            p++;
 
-			p++;
+            while (p < in_end && ((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f') || (*p >= 'A' && *p <= 'F')))
+                p++;
+        }
+    }
 
-			while (p < in_end && ((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f') || (*p >= 'A' && *p <= 'F')))
-				p++;
-		}
-		else if (*p == 'b' || *p == 'B')
-		{
-			// binary formatted integer of the type 0b01011101
-
-			isBinary = true;
-
-			p++;
-
-			while (p < in_end && (*p >= '0' && *p <= '1'))
-				p++;
-		}
-	}
-
-	if (isHex == false && isBinary == false)
-	{
-		// floating point exponent
-		if (p < in_end && (*p == 'e' || *p == 'E'))
-		{
-			isFloat = true;
-
-			p++;
-
-			if (p < in_end && (*p == '+' || *p == '-'))
-				p++;
-
-			bool hasDigits = false;
-
-			while (p < in_end && (*p >= '0' && *p <= '9'))
-			{
-				hasDigits = true;
-
-				p++;
-			}
-
-			if (hasDigits == false)
-				return false;
-		}
-
-		// single precision floating point type
-		if (p < in_end && *p == 'f')
-			p++;
-	}
-
-	if (isFloat == false)
-	{
-		// integer size type
-		while (p < in_end && (*p == 'u' || *p == 'U' || *p == 'l' || *p == 'L'))
-			p++;
-	}
-
-	out_begin = in_begin;
-	out_end = p;
-	return true;
+    out_begin = in_begin;
+    out_end = p;
+    return true;
 }
 
 static bool TokenizeCStylePunctuation(const char* in_begin, const char* in_end, const char*& out_begin, const char*& out_end)
@@ -215,6 +167,133 @@ static bool TokenizeCStylePunctuation(const char* in_begin, const char* in_end, 
 	}
 
 	return false;
+}
+
+
+static bool TokenizeCStyleNumber(const char* in_begin, const char* in_end, const char*& out_begin, const char*& out_end)
+{
+    const char* p = in_begin;
+
+    const bool startsWithNumber = *p >= '0' && *p <= '9';
+
+    if (*p != '+' && *p != '-' && !startsWithNumber)
+        return false;
+
+    p++;
+
+    bool hasNumber = startsWithNumber;
+
+    while (p < in_end && (*p >= '0' && *p <= '9'))
+    {
+        hasNumber = true;
+
+        p++;
+    }
+
+    if (hasNumber == false)
+        return false;
+
+    bool isFloat = false;
+    bool isHex = false;
+    bool isBinary = false;
+
+    if (p < in_end)
+    {
+        if (*p == '.')
+        {
+            isFloat = true;
+
+            p++;
+
+            while (p < in_end && (*p >= '0' && *p <= '9'))
+                p++;
+        }
+        else if (*p == 'x' || *p == 'X')
+        {
+            // hex formatted integer of the type 0xef80
+
+            isHex = true;
+
+            p++;
+
+            while (p < in_end && ((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f') || (*p >= 'A' && *p <= 'F')))
+                p++;
+        }
+        else if (*p == 'b' || *p == 'B')
+        {
+            // binary formatted integer of the type 0b01011101
+
+            isBinary = true;
+
+            p++;
+
+            while (p < in_end && (*p >= '0' && *p <= '1'))
+                p++;
+        }
+    }
+
+    if (isHex == false && isBinary == false)
+    {
+        // floating point exponent
+        if (p < in_end && (*p == 'e' || *p == 'E'))
+        {
+            isFloat = true;
+
+            p++;
+
+            if (p < in_end && (*p == '+' || *p == '-'))
+                p++;
+
+            bool hasDigits = false;
+
+            while (p < in_end && (*p >= '0' && *p <= '9'))
+            {
+                hasDigits = true;
+
+                p++;
+            }
+
+            if (hasDigits == false)
+                return false;
+        }
+
+        // single precision floating point type
+        if (p < in_end && *p == 'f')
+            p++;
+    }
+
+    if (isFloat == false)
+    {
+        // integer size type
+        while (p < in_end && (*p == 'u' || *p == 'U' || *p == 'l' || *p == 'L'))
+            p++;
+    }
+
+    out_begin = in_begin;
+    out_end = p;
+    return true;
+}
+
+static bool TokenizeX86StylePunctuation(const char* in_begin, const char* in_end, const char*& out_begin, const char*& out_end)
+{
+    (void)in_end;
+
+    switch (*in_begin)
+    {
+        case '[':
+        case ']':
+        case '*':
+        case '(':  // at&t syntax
+        case ')':
+        case '-':
+        case '+':
+        case ':':
+            out_begin = in_begin;
+            out_end = in_begin + 1;
+            return true;
+    }
+
+    return false;
 }
 
 static bool TokenizeLuaStyleString(const char* in_begin, const char* in_end, const char*& out_begin, const char*& out_end)
@@ -388,6 +467,138 @@ static bool TokenizeLuaStylePunctuation(const char* in_begin, const char* in_end
 	return false;
 }
 
+const TextEditor::LanguageDefinition& TextEditor::LanguageDefinition::Asmx86_64()
+{
+    static bool inited = false;
+    static LanguageDefinition langDef;
+    if (!inited)
+    {
+        static const char* const x86Keywords[] = {
+                "aaa", "aad", "aam", "aas", "adc", "add", "and", "arpl", "bound", "bsf", "bsr",
+                "bswap", "bt", "btc", "btr", "bts", "call", "cbw", "cdq", "clc", "cld", "cli",
+                "clts", "cmc", "cmova", "cmovae", "cmovb", "cmovbe", "cmovc", "cmove", "cmovg",
+                "cmovge", "cmovl", "cmovle", "cmovna", "cmovnae", "cmovnb", "cmovnbe", "cmovnc",
+                "cmovne", "cmovng", "cmovnge", "cmovnl", "cmovnle", "cmovno", "cmovnp", "cmovns",
+                "cmovnz", "cmovo", "cmovp", "cmovpe", "cmovpo", "cmovs", "cmovz", "cmp", "cmpsb",
+                "cmpsd", "cmpsq", "cmpsw", "cmpxchg", "cmpxchg8b", "cpuid", "cpu_read",
+                "cpu_write", "cwd", "cwde", "daa", "dd","das", "dec", "div", "emms", "enter", "f2xm1",
+                "fabs", "fadd", "faddp", "fbld", "fbstp", "fchs", "fclex", "fcmovb", "fcmovbe",
+                "fcmove", "fcmovnb", "fcmovnbe", "fcmovne", "fcmovnu", "fcmovu", "fcom", "fcomi",
+                "fcomip", "fcomp", "fcompp", "fcos", "fdecstp", "fdisi", "fdiv", "fdivp", "fdivr",
+                "fdivrp", "femms", "feni", "ffree", "ffreep", "fiadd", "ficom", "ficomp", "fidiv",
+                "fidivr", "fild", "fimul", "fincstp", "finit", "fist", "fistp", "fisttp", "fisub",
+                "fisubr", "fld", "fld1", "fldcw", "fldenv", "fldl2e", "fldl2t", "fldlg2", "fldln2",
+                "fldpi", "fldz", "fmul", "fmulp", "fnclex", "fndisi", "fneni", "fninit", "fnop",
+                "fnsave", "fnstcw", "fnstenv", "fnstsw", "fpatan", "fprem", "fprem1", "fptan",
+                "frndint", "frstor", "fsave", "fscale", "fsin", "fsincos", "fsqrt", "fst",
+                "fstcw", "fstenv", "fstp", "fstsw", "fsub", "fsubp", "fsubr", "fsubrp", "ftst",
+                "fucom", "fucomi", "fucomip", "fucomp", "fucompp", "fwait", "fxam", "fxch",
+                "fxtract", "fyl2x", "fyl2xp1", "hlt", "idiv", "imul", "in", "inc", "ins", "insb",
+                "insd", "insw", "int", "into", "invd", "invlpg", "iret", "iretd", "iretq", "jcxz",
+                "jecxz", "jrcxz", "jmp", "lahf", "lar", "lds", "lea", "leave", "les", "lfence",
+                "lfs", "lgdt", "lgs", "lidt", "lldt", "lmsw", "lock", "lods", "lodsb", "lodsd",
+                "lodsq", "lodsw", "loop", "loope", "loopne", "loopnz", "loopz", "lsl", "ltr",
+                "mfence", "mov", "movd", "movq", "movsb", "movsd", "movsq", "movsw", "movsx",
+                "movzx", "mul", "neg", "nop", "not", "or", "out", "outs", "outsb", "outsd",
+                "outsw", "packssdw", "packsswb", "packuswb", "paddb", "paddd", "paddsb",
+                "paddsw", "paddusb", "paddusw", "paddw", "pand", "pandn", "pause", "pavgb",
+                "pavgw", "pcmpeqb", "pcmpeqd", "pcmpeqw", "pcmpgtb", "pcmpgtd", "pcmpgtw",
+                "pdistib", "pf2id", "pfacc", "pfadd", "pfcmpeq", "pfcmpge", "pfcmpgt", "pfmax",
+                "pfmin", "pfmul", "pfnacc", "pfpnacc", "pfrcp", "pfrcpit1", "pfrcpit2", "pfrsqit1",
+                "pfrsqrt", "pfsub", "pfsubr", "pi2fd", "pmachriw", "pmaddwd", "pmagw", "pmulhriw",
+                "pmulhrwa", "pmulhrwc", "pmulhw", "pmullw", "pmvgezb", "pmvlzb", "pmvnzb",
+                "pmvzb", "pop", "popa", "popad", "popaw", "popf", "popfd", "popfq", "por", "prefetch",
+                "prefetchnta", "prefetcht0", "prefetcht1", "prefetcht2", "prefetchw", "pslld",
+                "psllq", "psllw", "psrad", "psraw", "psrld", "psrlq", "psrlw", "psubb", "psubd",
+                "psubsb", "psubsw", "psubusb", "psubusw", "psubw", "punpckhbw", "punpckhdq",
+                "punpckhwd", "punpcklbw", "punpckldq", "punpcklwd", "push", "pusha", "pushad",
+                "pushaw", "pushf", "pushfd", "pushfq", "pxor", "rcl", "rcr", "rdmsr", "rdpmc",
+                "rdshr", "rdtsc", "rep", "repe", "repne", "repnz", "repz", "ret", "retf", "retn",
+                "rol", "ror", "rsm", "sahf", "sal", "sar", "sbb", "scas", "scasb", "scasd",
+                "scasq", "scasw", "sfence", "sgdt", "shl", "shld", "shr", "shrd", "shufpd",
+                "shufps", "sidt", "sldt", "smsw", "stc", "std", "sti", "stos", "stosb", "stosd",
+                "stosq", "stosw", "str", "sub", "svdc", "svldt", "svts", "syscall", "sysenter",
+                "sysexit", "sysret", "test", "ud2", "unpckhpd", "unpckhps", "unpcklpd", "unpcklps",
+                "verr", "verw", "wait", "wbinvd", "wrmsr", "xadd", "xchg", "xlat", "xlatb", "xor"
+        };
+        for (auto& k : x86Keywords)
+            langDef.mKeywords.insert(k);
+
+        static const char* const identifiers[] = {
+                // General-purpose registers (32-bit)
+                "eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp",
+                "al", "ah", "bl", "bh", "cl", "ch", "dl", "dh",
+                // General-purpose registers (64-bit)
+                "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+                "sil", "dil", "bpl", "spl",
+                "r8b", "r9b", "r10b", "r11b", "r12b", "r13b", "r14b", "r15b",
+                // General-purpose registers (16-bit)
+                "ax", "bx", "cx", "dx", "si", "di", "bp", "sp",
+                // Segment registers
+                "cs", "ds", "ss", "es", "fs", "gs",
+                // Control registers
+                "cr0", "cr1", "cr2", "cr3", "cr4", "cr8",
+                "cr5", "cr6", "cr7", "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15",
+                // Debug registers
+                "dr0", "dr1", "dr2", "dr3", "dr6", "dr7",
+                "dr4", "dr5",
+                // Extended multimedia registers (SSE/AVX)
+                "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15",
+                "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",
+                // Floating-point registers
+                "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7",
+                // Other registers
+                "eip", "rip", "eflags", "rflags",
+        };
+
+        for (auto& k : identifiers)
+        {
+            Identifier id;
+            id.mDeclaration = "CPU Register";
+            langDef.mIdentifiers.insert(std::make_pair(std::string(k), id));
+        }
+
+        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, PaletteIndex>(R"##([a-zA-Z_]{1}[_a-zA-Z0-9]{0,}:)##", PaletteIndex::Identifier));
+
+        langDef.mTokenize = [](const char* in_begin, const char* in_end, const char*& out_begin, const char*& out_end, PaletteIndex& paletteIndex) -> bool
+        {
+            paletteIndex = PaletteIndex::Max;
+
+            while (in_begin < in_end && isascii(*in_begin) && isblank(*in_begin))
+                in_begin++;
+
+            if (in_begin == in_end)
+            {
+                out_begin = in_end;
+                out_end = in_end;
+                paletteIndex = PaletteIndex::Default;
+            }
+            else if (TokenizeCStyleString(in_begin, in_end, out_begin, out_end))
+                paletteIndex = PaletteIndex::String;
+            else if (TokenizeCStyleCharacterLiteral(in_begin, in_end, out_begin, out_end))
+                paletteIndex = PaletteIndex::CharLiteral;
+            else if (TokenizeCStyleIdentifier(in_begin, in_end, out_begin, out_end))
+                paletteIndex = PaletteIndex::Identifier;
+            else if (TokenizeCStyleNumber(in_begin, in_end, out_begin, out_end))
+                paletteIndex = PaletteIndex::Number;
+            else if (TokenizeCStylePunctuation(in_begin, in_end, out_begin, out_end))
+                paletteIndex = PaletteIndex::Punctuation;
+
+            return paletteIndex != PaletteIndex::Max;
+        };
+
+        langDef.mCommentStart = "%comment";
+        langDef.mCommentEnd = "%endcomment";
+        langDef.mSingleLineComment = ";";
+
+        langDef.mCaseSensitive = true;
+
+        langDef.mName = "Assembly x86";
+        inited = true;
+    }
+    return langDef;
+}
+
 const TextEditor::LanguageDefinition& TextEditor::LanguageDefinition::Cpp()
 {
 	static bool inited = false;
@@ -415,6 +626,7 @@ const TextEditor::LanguageDefinition& TextEditor::LanguageDefinition::Cpp()
 			id.mDeclaration = "Built-in function";
 			langDef.mIdentifiers.insert(std::make_pair(std::string(k), id));
 		}
+
 
 		langDef.mTokenize = [](const char* in_begin, const char* in_end, const char*& out_begin, const char*& out_end, PaletteIndex& paletteIndex) -> bool
 		{
