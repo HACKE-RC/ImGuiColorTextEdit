@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <map>
 #include <boost/regex.hpp>
+#include <cmath>
 #include "imgui.h"
 
 class IMGUI_API TextEditor
