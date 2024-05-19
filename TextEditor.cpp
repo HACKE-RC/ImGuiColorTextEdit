@@ -59,6 +59,9 @@ void TextEditor::SetLanguageDefinition(LanguageDefinitionId aValue)
 	case LanguageDefinitionId::None:
 		mLanguageDefinition = nullptr;
 		return;
+    case LanguageDefinitionId::Asmx86_64:
+        mLanguageDefinition = &(LanguageDefinition::Asmx86_64());
+        break;
 	case LanguageDefinitionId::Cpp:
 		mLanguageDefinition = &(LanguageDefinition::Cpp());
 		break;
