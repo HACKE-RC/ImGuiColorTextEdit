@@ -20,7 +20,7 @@ public:
 
 	TextEditor();
 	~TextEditor();
-
+	int mHighlightedLine = -1; // No line highlighted by default
 	enum class PaletteId
 	{
 		Dark, Light, Mariana, RetroBlue
@@ -67,6 +67,7 @@ public:
 	bool AnyCursorHasSelection() const;
 	bool AllCursorsHaveSelection() const;
 	void ClearExtraCursors();
+	void SetHighlightedLine(int line);
 	void ClearSelections();
 	void SetCursorPosition(int aLine, int aCharIndex);
 	inline void GetCursorPosition(int& outLine, int& outColumn) const
@@ -152,6 +153,7 @@ private:
 		CurrentLineFill,
 		CurrentLineFillInactive,
 		CurrentLineEdge,
+		HighlightedLine,
 		Max
 	};
 
