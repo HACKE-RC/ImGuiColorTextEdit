@@ -426,7 +426,6 @@ bool TextEditor::Render(const char* aTitle, bool aParentIsFocused, const ImVec2&
 	HandleMouseInputs();
 	ColorizeInternal();
 	Render(aParentIsFocused);
-
 	ImGui::EndChild();
 
 	ImGui::PopStyleVar();
@@ -2224,6 +2223,10 @@ void TextEditor::UpdateViewVariables(float aScrollX, float aScrollY)
 	mLastVisibleColumn = Max((int)((mContentWidth + aScrollX - mTextStart) / mCharAdvance.x), 0);
 }
 
+void TextEditor::SetHighlightedLine(int line) {
+	mHighlightedLine = line;
+}
+
 void TextEditor::Render(bool aParentIsFocused)
 {
 	/* Compute mCharAdvance regarding to scaled font size (Ctrl + mouse wheel)*/
@@ -2267,6 +2270,16 @@ void TextEditor::Render(bool aParentIsFocused)
 			{
 				float rectStart = -1.0f;
 				float rectEnd = -1.0f;
+				ImVec2 lineStartScreenPos = ImVec2(cursorScreenPos.x, cursorScreenPos.y + lineNo * mCharAdvance.y);
+				ImVec2 textScreenPos = ImVec2(lineStartScreenPos.x + mTextStart, lineStartScreenPos.y);
+
+				// Draw background if this is the highlighted line
+           		if (lineNo == mHighlightedLine) {
+					ImVec2 lineEndScreenPos = ImVec2(lineStartScreenPos.x + mContentWidth, lineStartScreenPos.y + mCharAdvance.y);
+					drawList->AddRectFilled(lineStartScreenPos, lineEndScreenPos, mPalette[(int)PaletteIndex::HighlightedLine]);
+				}
+
+
 				Coordinates cursorSelectionStart = mState.mCursors[c].GetSelectionStart();
 				Coordinates cursorSelectionEnd = mState.mCursors[c].GetSelectionEnd();
 				assert(cursorSelectionStart <= cursorSelectionEnd);
@@ -2864,6 +2877,7 @@ const TextEditor::Palette& TextEditor::GetDarkPalette()
 			0x00000040, // Current line fill
 			0x80808040, // Current line fill (inactive)
 			0xa0a0a040, // Current line edge
+			0x4B1515FF	
 		} };
 	return p;
 }
