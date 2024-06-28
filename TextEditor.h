@@ -20,8 +20,14 @@ public:
 
 	TextEditor();
 	~TextEditor();
-	int mHighlightedLine = -1; // No line highlighted by default
-	enum class PaletteId
+
+    std::vector<uint64_t> mLinesToHighlight= {};
+
+    enum HighlightType{
+        DebugBreakpoint,
+        DebugCurrentLine
+    };
+    enum class PaletteId
 	{
 		Dark, Light, Mariana, RetroBlue
 	};
@@ -34,6 +40,11 @@ public:
 		FirstVisibleLine, Centered, LastVisibleLine
 	};
 
+    void HighlightDebugCurrentLine(int line);
+    void HighlightBreakpoints(int line, bool ignoreHighlight = false);
+    int mLineToHighlight = -1;
+
+	void RenderContextMenu();
 	inline void SetReadOnlyEnabled(bool aValue) { mReadOnly = aValue; }
 	inline bool IsReadOnlyEnabled() const { return mReadOnly; }
 	inline void SetAutoIndentEnabled(bool aValue) { mAutoIndent = aValue; }
@@ -67,7 +78,6 @@ public:
 	bool AnyCursorHasSelection() const;
 	bool AllCursorsHaveSelection() const;
 	void ClearExtraCursors();
-	void SetHighlightedLine(int line);
 	void ClearSelections();
 	void SetCursorPosition(int aLine, int aCharIndex);
 	inline void GetCursorPosition(int& outLine, int& outColumn) const
@@ -153,7 +163,8 @@ private:
 		CurrentLineFill,
 		CurrentLineFillInactive,
 		CurrentLineEdge,
-		HighlightedLine,
+		DebugBreakpointLine,
+        DebugCurrentLine,
 		Max
 	};
 
@@ -465,7 +476,6 @@ private:
 	inline bool IsHorizontalScrollbarVisible() const { return mCurrentSpaceWidth > mContentWidth; }
 	inline bool IsVerticalScrollbarVisible() const { return mCurrentSpaceHeight > mContentHeight; }
 	inline int TabSizeAtColumn(int aColumn) const { return mTabSize - (aColumn % mTabSize); }
-
 	static const Palette& GetDarkPalette();
 	static const Palette& GetMarianaPalette();
 	static const Palette& GetLightPalette();
