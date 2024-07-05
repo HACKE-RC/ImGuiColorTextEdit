@@ -42,6 +42,7 @@ public:
 
     void HighlightDebugCurrentLine(int line);
     void HighlightBreakpoints(int line, bool ignoreHighlight = false);
+    void RemoveHighlight(int line);
     int mLineToHighlight = -1;
 
 	void RenderContextMenu();

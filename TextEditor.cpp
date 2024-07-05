@@ -2249,6 +2249,13 @@ void TextEditor::HighlightBreakpoints(int line, bool ignoreHighlight) {
     }
 }
 
+void TextEditor::RemoveHighlight(int line) {
+    auto idx = std::find(mLinesToHighlight.begin(), mLinesToHighlight.end(), line);
+    if (idx != mLinesToHighlight.end()){
+        mLinesToHighlight.erase(idx);
+    }
+}
+
 void TextEditor::Render(bool aParentIsFocused)
 {
     /* Compute mCharAdvance regarding to scaled font size (Ctrl + mouse wheel)*/
