@@ -100,6 +100,7 @@ public:
 	inline bool CanRedo() const { return !mReadOnly && mUndoIndex < (int)mUndoBuffer.size(); };
 	inline int GetUndoIndex() const { return mUndoIndex; };
 
+    std::string GetSelectedText(int aCursor = -1) const;
 	void SetText(const std::string& aText);
 	std::string GetText() const;
 
@@ -339,11 +340,11 @@ private:
 
 		EditorState mBefore;
 		EditorState mAfter;
+
 	};
 
 	std::string GetText(const Coordinates& aStart, const Coordinates& aEnd) const;
 	std::string GetClipboardText() const;
-	std::string GetSelectedText(int aCursor = -1) const;
 
 	void SetCursorPosition(const Coordinates& aPosition, int aCursor = -1, bool aClearSelection = true);
 
