@@ -41,6 +41,9 @@ void TextEditor::SetPalette(PaletteId aValue)
         case PaletteId::RetroBlue:
             palletteBase = &(GetRetroBluePalette());
             break;
+        case PaletteId::Catppuccin:
+            palletteBase = &(GetCatppuccin());
+            break;
     }
     /* Update palette with the current alpha from style */
     for (int i = 0; i < (int)PaletteIndex::Max; ++i)
@@ -623,7 +626,7 @@ void TextEditor::UndoRecord::Redo(TextEditor* aEditor)
 
 std::string TextEditor::GetText(const Coordinates& aStart, const Coordinates& aEnd) const
 {
-    if (aStart < aEnd){
+    if (aStart > aEnd){
         return "";
     }
 
@@ -1199,6 +1202,60 @@ void TextEditor::AddCursorForNextOccurrence(bool aCaseSensitive)
     mState.SortCursorsFromTopToBottom();
     MergeCursorsIfPossible();
     EnsureCursorVisible(-1, true);
+}
+
+bool TextEditor::CreateLabelsVector(){
+    unsigned int lineNo = 1;
+
+    for (auto & mLine : mLines) {
+        if (mLine.empty()){
+            lineNo++;
+            continue;
+        }
+
+        bool foundColon = false;
+        bool foundSemiColon = false;
+
+        std::string line;
+        for (auto & i : mLine){
+            if (i.mChar == ':'){
+                if (!foundSemiColon){
+                    foundColon = true;
+                }
+            }
+            else if (i.mChar == ';'){
+                foundSemiColon = true;
+            }
+            line += i.mChar;
+        }
+        line.pop_back();
+
+        if (foundColon){
+            labelLineNoMap.insert({line, lineNo});
+        }
+
+        lineNo++;
+    }
+
+
+    return true;
+}
+
+bool TextEditor::SelectLabelDefinition(bool useScreenPos){
+    Coordinates cursorCoords = useScreenPos ? ScreenPosToCoordinates(ImGui::GetMousePos()) : GetActualCursorCoordinates();
+    std::string label = GetText(FindWordStart(cursorCoords), FindWordEnd(cursorCoords));
+
+    if (labelLineNoMap.count(label) == 0){
+        return false;
+    }
+
+    int line = labelLineNoMap[label];
+
+    SetCursorPosition(line, 0);
+    cursorCoords = {line - 1, 0};
+    ClearSelections();
+    SetSelection(FindWordStart(cursorCoords), FindWordEnd(cursorCoords), mState.mCurrentCursor);
+    return true;
 }
 
 bool TextEditor::FindNextOccurrence(const char* aText, int aTextSize, const Coordinates& aFrom, Coordinates& outStart, Coordinates& outEnd, bool aCaseSensitive)
@@ -2122,7 +2179,7 @@ void TextEditor::HandleMouseInputs()
     if (ImGui::IsWindowHovered())
     {
         auto click = ImGui::IsMouseClicked(0);
-        if (!shift && !alt)
+        if (!shift)
         {
             auto doubleClick = ImGui::IsMouseDoubleClicked(0);
             auto t = ImGui::GetTime();
@@ -2186,8 +2243,12 @@ void TextEditor::HandleMouseInputs()
                 */
             else if (click)
             {
-                if (ctrl)
+                if (alt)
                     mState.AddCursor();
+                else if (ctrl){
+                    SelectLabelDefinition();
+                    return;
+                }
                 else
                     mState.mCurrentCursor = 0;
 
@@ -2451,6 +2512,12 @@ void TextEditor::Render(bool aParentIsFocused)
                 }
 
                 MoveCharIndexAndColumn(lineNo, charIndex, column);
+
+                if (mLines.size() != mLinesSize){
+                    mLinesSize = mLines.size();
+                    CreateLabelsVector();
+                }
+
             }
         }
     }
@@ -3003,6 +3070,39 @@ const TextEditor::Palette& TextEditor::GetRetroBluePalette()
                                } };
     return p;
 }
+
+const TextEditor::Palette& TextEditor::GetCatppuccin()
+{
+    const static Palette p = { {
+                                       0xf4dbd6ff,	// None
+                                       0xf0c6c6ff,	// Keyword
+                                       0xf5bde6ff,	// Number
+                                       0xc6a0f6ff,	// String
+                                       0xed8796ff, // Char literal
+                                       0xee99a0ff, // Punctuation
+                                       0xf5a97fff,	// Preprocessor
+                                       0xeed49fff, // Identifier
+                                       0xa6da95ff, // Known identifier
+                                       0x8bd5caff, // Preproc identifier
+                                       0x91d7e3ff, // Comment (single line)
+                                       0x7dc4e4ff, // Comment (multi line)
+                                       0x24273aff, // Background
+                                       0xb7bdf8ff, // Cursor
+                                       0x2060a080, // Selection
+                                       0xb8c0e0ff, // ErrorMarker
+                                       0x0080ff80, // Breakpoint
+                                       0x8aadf4ff, // Line number
+                                       0xb8c0e0ff, // Current line fill
+                                       0xa5adcbff, // Current line fill (inactive)
+                                       0x939ab7ff, // Current line edge
+                                       0xFFFFFFFF,
+                                       0x4B1515FF,
+                                       0xb7bdf850
+                                       //                                       0x10516bff
+                   } };
+    return p;
+}
+
 
 const std::unordered_map<char, char> TextEditor::OPEN_TO_CLOSE_CHAR = {
         {'{', '}'},
