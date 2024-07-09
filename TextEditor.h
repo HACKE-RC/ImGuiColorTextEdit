@@ -490,4 +490,4 @@ private:
 	static const std::unordered_map<char, char> OPEN_TO_CLOSE_CHAR;
 	static const std::unordered_map<char, char> CLOSE_TO_OPEN_CHAR;
 	static PaletteId defaultPalette;
-}
+};
