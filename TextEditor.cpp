@@ -2,13 +2,14 @@
 #include <string>
 #include <cmath>
 #include <set>
-
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "TextEditor.h"
 
 #define IMGUI_SCROLLBAR_WIDTH 14.0f
 #define POS_TO_COORDS_COLUMN_OFFSET 0.33f
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h" // for imGui::GetCurrentWindow()
+#include "imgui_internal.h"
 
 // --------------------------------------- //
 // ------------- Exposed API ------------- //
@@ -1203,43 +1204,42 @@ void TextEditor::AddCursorForNextOccurrence(bool aCaseSensitive)
     MergeCursorsIfPossible();
     EnsureCursorVisible(-1, true);
 }
-
-bool TextEditor::CreateLabelsVector(){
-    unsigned int lineNo = 1;
-
-    for (auto & mLine : mLines) {
-        if (mLine.empty()){
-            lineNo++;
-            continue;
-        }
-
-        bool foundColon = false;
-        bool foundSemiColon = false;
-
-        std::string line;
-        for (auto & i : mLine){
-            if (i.mChar == ':'){
-                if (!foundSemiColon){
-                    foundColon = true;
-                }
-            }
-            else if (i.mChar == ';'){
-                foundSemiColon = true;
-            }
-            line += i.mChar;
-        }
-        line.pop_back();
-
-        if (foundColon){
-            labelLineNoMap.insert({line, lineNo});
-        }
-
-        lineNo++;
-    }
-
-
-    return true;
-}
+//
+//bool TextEditor::CreateLabelsVector(){
+//    unsigned int lineNo = 1;
+//
+//    for (auto & mLine : mLines) {
+//        if (mLine.empty()){
+//            lineNo++;
+//            continue;
+//        }
+//
+//        bool foundColon = false;
+//        bool foundSemiColon = false;
+//
+//        std::string line;
+//        for (auto & i : mLine){
+//            if (i.mChar == ':'){
+//                if (!foundSemiColon){
+//                    foundColon = true;
+//                }
+//            }
+//            else if (i.mChar == ';'){
+//                foundSemiColon = true;
+//            }
+//            line += i.mChar;
+//        }
+//        line.pop_back();
+//
+//        if (foundColon){
+//            labelLineNoMap.insert({line, lineNo});
+//        }
+//
+//        lineNo++;
+//    }
+//
+//    return true;
+//}
 
 bool TextEditor::SelectLabelDefinition(bool useScreenPos){
     Coordinates cursorCoords = useScreenPos ? ScreenPosToCoordinates(ImGui::GetMousePos()) : GetActualCursorCoordinates();
@@ -2040,6 +2040,172 @@ ImU32 TextEditor::GetGlyphColor(const Glyph& aGlyph) const
     return color;
 }
 
+
+//TextEditor::Coordinates TextEditor::ParseStrIntoCoordinates(const std::string& popupInput){
+//    int lineNo = -1;
+//    int colNo = 0;
+//    std::string convStr;
+//    std::string labelStr;
+//    for (auto&c: popupInput){
+//        if (c == ':' && lineNo == -1){
+//            if (!convStr.empty()){
+//                try{
+//                    lineNo = stoi(convStr);
+//                }
+//                catch (std::invalid_argument& e){
+//                    labelStr = convStr;
+//                }
+//                catch (std::exception& e){
+//                    lineNo = 1;
+//                }
+//                convStr = "";
+//                convStr.clear();
+//            }
+//        }
+//        if (c!=' ' && c!=':'){
+//            convStr += c;
+//        }
+//    }
+//
+//    if (!labelStr.empty()){
+//        if (labelLineNoMap.contains(labelStr)){
+//            lineNo = labelLineNoMap[labelStr];
+//        }
+//    }
+//
+//    if (lineNo == -1 && !convStr.empty()){
+//        if (labelLineNoMap.contains(convStr)){
+//            lineNo = labelLineNoMap[convStr];
+//        }
+//        else{
+//            try{
+//                lineNo = stoi(convStr);
+//            }
+//            catch (std::exception& e){
+//                lineNo = 1;
+//            }
+//        }
+//
+//        convStr = "";
+//        convStr.clear();
+//    }
+//
+//    if (lineNo != -1){
+//        if (!convStr.empty()){
+//            try{
+//                colNo = stoi(convStr);
+//            }
+//            catch (std::exception& e){
+//                colNo = 1;
+//            }
+//        }
+//    }
+//
+//    if (lineNo < 0){
+//        lineNo = 1;
+//    }
+//    else if (colNo < 0){
+//        colNo = 0;
+//    }
+//
+//    return {lineNo - 1, colNo};
+//}
+
+void TextEditor::GoToPopup(){
+    char inputText[200] = "";
+    static bool setFocus = true;
+
+    if (FontInit){
+        FontInit();
+    }
+
+    if (keepPopup){
+        ImGui::OpenPopup("InputPopup");
+    }
+
+    auto text = "Go to Line:Column";
+
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    ImVec2 windowTextPos= ImGui::CalcTextSize(text);
+    ImVec2 windowSize = ImGui::GetWindowSize();
+    ImVec2 popupSize = ImVec2(300, 100); // Adjust based on your popup size
+    ImVec2 popupPos = windowPos + ImVec2((windowSize.x - popupSize.x) * 0.5f, (windowSize.y - popupSize.y) * 0.5f);
+
+    ImGui::SetNextWindowPos(popupPos, ImGuiCond_Appearing);
+
+    ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = ImColor(0x1e, 0x20, 0x30);
+    ImGui::GetStyle().PopupBorderSize = 5.0f;
+
+    ImGui::SetNextWindowSize(ImVec2(300.0, 100.0), 0);
+    if (ImGui::BeginPopup("InputPopup", ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        windowSize = ImGui::GetWindowSize();
+
+        ImGui::SetCursorPosX((windowSize.x - windowTextPos.x) * 0.5f);
+        ImGui::Text("%s", text);
+
+        ImGui::Dummy(ImVec2(0.0f, 15.0f));
+        ImGui::NewLine();
+        ImGui::SameLine(0, 10);
+
+        ImGui::Text("[Line][:Column]: ");
+
+        ImGui::SameLine(0, 5);
+        ImGui::PushItemWidth(150);
+
+        bool entered;
+        auto flags = ImGuiInputTextFlags_EnterReturnsTrue;
+        ImGuiInputTextCallback callback = nullptr;
+
+        if (CompletionCallback){
+            flags = static_cast<ImGuiInputTextFlags_>(flags | ImGuiInputTextFlags_CallbackCompletion);
+            callback = reinterpret_cast<ImGuiInputTextCallback>(CompletionCallback);
+        }
+
+        entered = ImGui::InputTextWithHint("##input", "Line or Label", inputText, IM_ARRAYSIZE(inputText), flags, callback);
+
+        if (setFocus){
+            ImGui::SetKeyboardFocusHere(-1);
+            setFocus = false;
+        }
+
+        if (entered){
+            if (ParseStrIntoCoordinates){
+                auto [x, y] = ParseStrIntoCoordinates(std::string(inputText));
+                SetCursorPosition(Coordinates(x, y));
+            }
+            keepPopup = false;
+            setFocus = true;
+        }
+
+        ImGui::PopItemWidth();
+        ImGui::Dummy(ImVec2(0, 8.0f));
+        ImGui::SetCursorPosX(windowSize.y + windowSize.y - 12);
+
+        if (ImGui::Button("OK"))
+        {
+            keepPopup = false;
+            setFocus = true;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine(0, 3);
+
+        if (ImGui::Button("CANCEL"))
+        {
+            keepPopup = false;
+            setFocus = true;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+
+    if (FontInit){
+        ImGui::PopFont();
+    }
+}
+
 void TextEditor::HandleKeyboardInputs(bool aParentIsFocused)
 {
     if (ImGui::IsWindowFocused() || aParentIsFocused)
@@ -2126,6 +2292,9 @@ void TextEditor::HandleKeyboardInputs(bool aParentIsFocused)
             SelectAll();
         else if (isShortcut && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_D)))
             AddCursorForNextOccurrence();
+        else if (isShortcut && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_G))){
+            keepPopup = true;
+        }
         else if (!mReadOnly && !alt && !ctrl && !shift && !super && (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)) || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_KeypadEnter))))
             EnterCharacter('\n', false);
         else if (!mReadOnly && !alt && !ctrl && !super && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab)))
@@ -2140,6 +2309,10 @@ void TextEditor::HandleKeyboardInputs(bool aParentIsFocused)
             }
             io.InputQueueCharacters.resize(0);
         }
+    }
+
+    if (keepPopup){
+        GoToPopup();
     }
 }
 
@@ -2515,7 +2688,9 @@ void TextEditor::Render(bool aParentIsFocused)
 
                 if (mLines.size() != mLinesSize){
                     mLinesSize = mLines.size();
-                    CreateLabelsVector();
+                    if (CreateLabelLineMap!= nullptr){
+                        CreateLabelLineMap(labelLineNoMap);
+                    }
                 }
 
             }

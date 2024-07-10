@@ -102,10 +102,17 @@ public:
 	inline bool CanRedo() const { return !mReadOnly && mUndoIndex < (int)mUndoBuffer.size(); };
 	inline int GetUndoIndex() const { return mUndoIndex; };
 
+    void (*FontInit)() = nullptr;
+    ImGuiInputTextCallback (*CompletionCallback)(ImGuiInputTextCallbackData *data) = nullptr;
+    void (*CreateLabelLineMap)(std::map<std::string, int>& labeLineMap) = nullptr;
+    std::pair<int, int> (*ParseStrIntoCoordinates)(const std::string& popupInput) = nullptr;
+
+    void GoToPopup();
     std::string GetSelectedText(int aCursor = -1) const;
 	void SetText(const std::string& aText);
 	std::string GetText() const;
 
+    std::map<std::string, int> labelLineNoMap;
 	void SetTextLines(const std::vector<std::string>& aLines);
 	std::vector<std::string> GetTextLines() const;
 
@@ -172,7 +179,6 @@ private:
 		Max
 	};
 
-    std::map<std::string, int> labelLineNoMap;
     size_t mLinesSize = 0;
 	// Represents a character coordinate from the user's point of view,
 	// i. e. consider an uniform grid (assuming fixed-width font) on the
@@ -378,7 +384,7 @@ private:
 	void SelectNextOccurrenceOf(const char* aText, int aTextSize, int aCursor = -1, bool aCaseSensitive = true);
 	void AddCursorForNextOccurrence(bool aCaseSensitive = true);
 	bool FindNextOccurrence(const char* aText, int aTextSize, const Coordinates& aFrom, Coordinates& outStart, Coordinates& outEnd, bool aCaseSensitive = true);
-    bool CreateLabelsVector();
+    int labelCompletionCallback(ImGuiInputTextCallbackData* data);
 	bool FindMatchingBracket(int aLine, int aCharIndex, Coordinates& out);
 	void ChangeCurrentLinesIndentation(bool aIncrease);
 	void MoveUpCurrentLines();
@@ -410,7 +416,7 @@ private:
 	void AddGlyphsToLine(int aLine, int aTargetIndex, Line::iterator aSourceStart, Line::iterator aSourceEnd);
 	void AddGlyphToLine(int aLine, int aTargetIndex, Glyph aGlyph);
 	ImU32 GetGlyphColor(const Glyph& aGlyph) const;
-
+    bool keepPopup = false;
 	void HandleKeyboardInputs(bool aParentIsFocused = false);
 	void HandleMouseInputs();
 	void UpdateViewVariables(float aScrollX, float aScrollY);
