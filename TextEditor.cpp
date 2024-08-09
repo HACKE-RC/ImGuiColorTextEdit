@@ -2169,7 +2169,8 @@ void TextEditor::GoToPopup(){
 
        if (entered){
             if (ParseStrIntoCoordinates){
-                auto [x, y] = ParseStrIntoCoordinates(std::string(inputText));
+                auto inputstr = std::string(inputText);
+                auto [x, y] = ParseStrIntoCoordinates(inputstr);
                 SetCursorPosition(Coordinates(x, y));
             }
             keepPopup = false;
