@@ -2040,11 +2040,6 @@ ImU32 TextEditor::GetGlyphColor(const Glyph& aGlyph) const
     return color;
 }
 
-<<<<<<< HEAD
-void TextEditor::GoToPopup(){
-    static char inputText[200] = "";
-=======
-
 //TextEditor::Coordinates TextEditor::ParseStrIntoCoordinates(const std::string& popupInput){
 //    int lineNo = -1;
 //    int colNo = 0;
@@ -2117,7 +2112,6 @@ void TextEditor::GoToPopup(){
 
 void TextEditor::GoToPopup(){
     char inputText[200] = "";
->>>>>>> 19ff273e0f9a47f5e2baf6c48494445d8287320e
     static bool setFocus = true;
 
     if (FontInit){
@@ -2133,23 +2127,14 @@ void TextEditor::GoToPopup(){
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 windowTextPos= ImGui::CalcTextSize(text);
     ImVec2 windowSize = ImGui::GetWindowSize();
-<<<<<<< HEAD
-    ImVec2 popupSize = ImVec2(300, 110);
-=======
-    ImVec2 popupSize = ImVec2(300, 100); // Adjust based on your popup size
->>>>>>> 19ff273e0f9a47f5e2baf6c48494445d8287320e
+   ImVec2 popupSize = ImVec2(300, 100); // Adjust based on your popup size
     ImVec2 popupPos = windowPos + ImVec2((windowSize.x - popupSize.x) * 0.5f, (windowSize.y - popupSize.y) * 0.5f);
 
     ImGui::SetNextWindowPos(popupPos, ImGuiCond_Appearing);
 
     ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = ImColor(0x1e, 0x20, 0x30);
     ImGui::GetStyle().PopupBorderSize = 5.0f;
-<<<<<<< HEAD
-    ImGui::SetNextWindowSize(popupSize, 0);
-=======
-
     ImGui::SetNextWindowSize(ImVec2(300.0, 100.0), 0);
->>>>>>> 19ff273e0f9a47f5e2baf6c48494445d8287320e
     if (ImGui::BeginPopup("InputPopup", ImGuiWindowFlags_AlwaysAutoResize))
     {
         windowSize = ImGui::GetWindowSize();
@@ -2166,13 +2151,8 @@ void TextEditor::GoToPopup(){
         ImGui::SameLine(0, 5);
         ImGui::PushItemWidth(150);
 
-<<<<<<< HEAD
-        bool entered = false;
-        auto flags = ImGuiInputTextFlags_CharsNoBlank;
-=======
-        bool entered;
+       bool entered;
         auto flags = ImGuiInputTextFlags_EnterReturnsTrue;
->>>>>>> 19ff273e0f9a47f5e2baf6c48494445d8287320e
         ImGuiInputTextCallback callback = nullptr;
 
         if (CompletionCallback){
@@ -2180,27 +2160,14 @@ void TextEditor::GoToPopup(){
             callback = reinterpret_cast<ImGuiInputTextCallback>(CompletionCallback);
         }
 
-<<<<<<< HEAD
-        ImGui::InputTextWithHint("##input", "Line or Label", inputText, IM_ARRAYSIZE(inputText), flags, callback);
-        if (ImGui::IsKeyPressed(ImGuiKey_Enter)){
-            entered = true;
-        }
-=======
-        entered = ImGui::InputTextWithHint("##input", "Line or Label", inputText, IM_ARRAYSIZE(inputText), flags, callback);
->>>>>>> 19ff273e0f9a47f5e2baf6c48494445d8287320e
+       entered = ImGui::InputTextWithHint("##input", "Line or Label", inputText, IM_ARRAYSIZE(inputText), flags, callback);
 
         if (setFocus){
             ImGui::SetKeyboardFocusHere(-1);
             setFocus = false;
         }
 
-<<<<<<< HEAD
-
-        ImGui::PopItemWidth();
-        ImGui::Dummy(ImVec2(0, 8.0f));
-        ImGui::SetCursorPosX(ImGui::CalcTextSize("OK").x * 8 + 10);
-=======
-        if (entered){
+       if (entered){
             if (ParseStrIntoCoordinates){
                 auto [x, y] = ParseStrIntoCoordinates(std::string(inputText));
                 SetCursorPosition(Coordinates(x, y));
@@ -2212,29 +2179,12 @@ void TextEditor::GoToPopup(){
         ImGui::PopItemWidth();
         ImGui::Dummy(ImVec2(0, 8.0f));
         ImGui::SetCursorPosX(windowSize.y + windowSize.y - 12);
->>>>>>> 19ff273e0f9a47f5e2baf6c48494445d8287320e
 
         if (ImGui::Button("OK"))
         {
             keepPopup = false;
             setFocus = true;
-<<<<<<< HEAD
-            entered = true;
-        }
-
-        if (entered){
-            if (ParseStrIntoCoordinates){
-                auto str = std::string(inputText);
-                auto [x, y] = ParseStrIntoCoordinates(str);
-                SetCursorPosition(Coordinates(x, y));
-            }
-            keepPopup = false;
-            setFocus = true;
-            ImGui::CloseCurrentPopup();
-            inputText[0] = '\0';
-=======
-            ImGui::CloseCurrentPopup();
->>>>>>> 19ff273e0f9a47f5e2baf6c48494445d8287320e
+           ImGui::CloseCurrentPopup();
         }
 
         ImGui::SameLine(0, 3);
