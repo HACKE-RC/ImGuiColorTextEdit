@@ -1,7 +1,5 @@
 # About this fork
-You can use https://github.com/santaclose/ste as a demo.
-
-Feel free to join my [discord server](https://discord.gg/H7paVYPUUA) if you want to discuss anything about this fork.
+This fork is specifically for the features that are required in [ZathuraDbg](https://github.com/HACKE-RC/Zathura-UI). Most are not documented yet but I wish to do this later.
 
 Features I've been working on:
 - multicursor (ctrl + click to add a new one)
