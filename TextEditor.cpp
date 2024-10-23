@@ -265,8 +265,14 @@ void TextEditor::Paste()
     if (mReadOnly)
         return;
 
+    const std::string originalClipboardText = ImGui::GetClipboardText();
+    if (PasteCallback) {
+        PasteCallback(originalClipboardText);
+    }
+
     // check if we should do multicursor paste
-    std::string clipText = ImGui::GetClipboardText();
+    const std::string clipText = ImGui::GetClipboardText();
+
     bool canPasteToMultipleCursors = false;
     std::vector<std::pair<int, int>> clipTextLines;
     if (mState.mCurrentCursor > 0)
@@ -316,6 +322,10 @@ void TextEditor::Paste()
 
         u.mAfter = mState;
         AddUndo(u);
+    }
+
+    if (PasteCallback) {
+        ImGui::SetClipboardText(originalClipboardText.c_str());
     }
 }
 
@@ -2040,76 +2050,6 @@ ImU32 TextEditor::GetGlyphColor(const Glyph& aGlyph) const
     return color;
 }
 
-//TextEditor::Coordinates TextEditor::ParseStrIntoCoordinates(const std::string& popupInput){
-//    int lineNo = -1;
-//    int colNo = 0;
-//    std::string convStr;
-//    std::string labelStr;
-//    for (auto&c: popupInput){
-//        if (c == ':' && lineNo == -1){
-//            if (!convStr.empty()){
-//                try{
-//                    lineNo = stoi(convStr);
-//                }
-//                catch (std::invalid_argument& e){
-//                    labelStr = convStr;
-//                }
-//                catch (std::exception& e){
-//                    lineNo = 1;
-//                }
-//                convStr = "";
-//                convStr.clear();
-//            }
-//        }
-//        if (c!=' ' && c!=':'){
-//            convStr += c;
-//        }
-//    }
-//
-//    if (!labelStr.empty()){
-//        if (labelLineNoMap.contains(labelStr)){
-//            lineNo = labelLineNoMap[labelStr];
-//        }
-//    }
-//
-//    if (lineNo == -1 && !convStr.empty()){
-//        if (labelLineNoMap.contains(convStr)){
-//            lineNo = labelLineNoMap[convStr];
-//        }
-//        else{
-//            try{
-//                lineNo = stoi(convStr);
-//            }
-//            catch (std::exception& e){
-//                lineNo = 1;
-//            }
-//        }
-//
-//        convStr = "";
-//        convStr.clear();
-//    }
-//
-//    if (lineNo != -1){
-//        if (!convStr.empty()){
-//            try{
-//                colNo = stoi(convStr);
-//            }
-//            catch (std::exception& e){
-//                colNo = 1;
-//            }
-//        }
-//    }
-//
-//    if (lineNo < 0){
-//        lineNo = 1;
-//    }
-//    else if (colNo < 0){
-//        colNo = 0;
-//    }
-//
-//    return {lineNo - 1, colNo};
-//}
-
 void TextEditor::GoToPopup(){
     char inputText[200] = "";
     static bool setFocus = true;
@@ -2127,7 +2067,7 @@ void TextEditor::GoToPopup(){
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 windowTextPos= ImGui::CalcTextSize(text);
     ImVec2 windowSize = ImGui::GetWindowSize();
-   ImVec2 popupSize = ImVec2(300, 100); // Adjust based on your popup size
+    ImVec2 popupSize = ImVec2(300, 100); // Adjust based on your popup size
     ImVec2 popupPos = windowPos + ImVec2((windowSize.x - popupSize.x) * 0.5f, (windowSize.y - popupSize.y) * 0.5f);
 
     ImGui::SetNextWindowPos(popupPos, ImGuiCond_Appearing);
@@ -2151,7 +2091,7 @@ void TextEditor::GoToPopup(){
         ImGui::SameLine(0, 5);
         ImGui::PushItemWidth(150);
 
-       bool entered;
+        bool entered;
         auto flags = ImGuiInputTextFlags_EnterReturnsTrue;
         ImGuiInputTextCallback callback = nullptr;
 

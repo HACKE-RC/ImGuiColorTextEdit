@@ -105,7 +105,8 @@ public:
     void (*FontInit)() = nullptr;
     ImGuiInputTextCallback (*CompletionCallback)(ImGuiInputTextCallbackData *data) = nullptr;
     void (*CreateLabelLineMap)(std::map<std::string, int>& labeLineMap) = nullptr;
-   std::pair<int, int> (*ParseStrIntoCoordinates)(std::string& popupInput) = nullptr;
+    std::pair<int, int> (*ParseStrIntoCoordinates)(std::string& popupInput) = nullptr;
+    void (*PasteCallback)(std::string clipboardText) = nullptr;
 
     void GoToPopup();
     std::string GetSelectedText(int aCursor = -1) const;
