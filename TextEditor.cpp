@@ -2064,17 +2064,17 @@ void TextEditor::GoToPopup(){
 
     auto text = "Go to Line:Column";
 
-    ImVec2 windowPos = ImGui::GetWindowPos();
-    ImVec2 windowTextPos= ImGui::CalcTextSize(text);
+    const ImVec2 windowPos = ImGui::GetWindowPos();
+    const ImVec2 windowTextPos= ImGui::CalcTextSize(text);
     ImVec2 windowSize = ImGui::GetWindowSize();
-    ImVec2 popupSize = ImVec2(300, 100); // Adjust based on your popup size
-    ImVec2 popupPos = windowPos + ImVec2((windowSize.x - popupSize.x) * 0.5f, (windowSize.y - popupSize.y) * 0.5f);
+    constexpr auto popupSize = ImVec2(300, 110);
+    const ImVec2 popupPos = windowPos + ImVec2((windowSize.x - popupSize.x) * 0.5f, (windowSize.y - popupSize.y) * 0.5f);
 
     ImGui::SetNextWindowPos(popupPos, ImGuiCond_Appearing);
 
     ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = ImColor(0x1e, 0x20, 0x30);
     ImGui::GetStyle().PopupBorderSize = 5.0f;
-    ImGui::SetNextWindowSize(ImVec2(300.0, 100.0), 0);
+    ImGui::SetNextWindowSize(ImVec2(300.0, 110.0), 0);
     if (ImGui::BeginPopup("InputPopup", ImGuiWindowFlags_AlwaysAutoResize))
     {
         windowSize = ImGui::GetWindowSize();
@@ -2119,7 +2119,7 @@ void TextEditor::GoToPopup(){
 
         ImGui::PopItemWidth();
         ImGui::Dummy(ImVec2(0, 8.0f));
-        ImGui::SetCursorPosX(windowSize.y + windowSize.y - 12);
+        ImGui::SetCursorPosX(windowSize.y + windowSize.y - 30);
 
         if (ImGui::Button("OK"))
         {
