@@ -63,38 +63,8 @@ void TextEditor::SetLanguageDefinition(LanguageDefinitionId aValue)
         case LanguageDefinitionId::None:
             mLanguageDefinition = nullptr;
             return;
-        case LanguageDefinitionId::Asmx86_64:
-            mLanguageDefinition = &(LanguageDefinition::Asmx86_64());
-            break;
-        case LanguageDefinitionId::Cpp:
-            mLanguageDefinition = &(LanguageDefinition::Cpp());
-            break;
-        case LanguageDefinitionId::C:
-            mLanguageDefinition = &(LanguageDefinition::C());
-            break;
-        case LanguageDefinitionId::Cs:
-            mLanguageDefinition = &(LanguageDefinition::Cs());
-            break;
-        case LanguageDefinitionId::Python:
-            mLanguageDefinition = &(LanguageDefinition::Python());
-            break;
-        case LanguageDefinitionId::Lua:
-            mLanguageDefinition = &(LanguageDefinition::Lua());
-            break;
-        case LanguageDefinitionId::Json:
-            mLanguageDefinition = &(LanguageDefinition::Json());
-            break;
-        case LanguageDefinitionId::Sql:
-            mLanguageDefinition = &(LanguageDefinition::Sql());
-            break;
-        case LanguageDefinitionId::AngelScript:
-            mLanguageDefinition = &(LanguageDefinition::AngelScript());
-            break;
-        case LanguageDefinitionId::Glsl:
-            mLanguageDefinition = &(LanguageDefinition::Glsl());
-            break;
-        case LanguageDefinitionId::Hlsl:
-            mLanguageDefinition = &(LanguageDefinition::Hlsl());
+        case LanguageDefinitionId::Asm:
+            mLanguageDefinition = &(LanguageDefinition::Asm());
             break;
     }
 

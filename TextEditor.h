@@ -33,7 +33,7 @@ public:
 	};
 	enum class LanguageDefinitionId
 	{
-		None, Cpp, C, Cs, Python, Lua, Json, Sql, AngelScript, Glsl, Hlsl, Asmx86_64
+		None, Asm
 	};
 	enum class SetViewAtLineMode
 	{
@@ -309,17 +309,7 @@ private:
 		std::vector<TokenRegexString> mTokenRegexStrings;
 		bool mCaseSensitive = true;
 
-        static const LanguageDefinition& Asmx86_64();
-		static const LanguageDefinition& Cpp();
-		static const LanguageDefinition& Hlsl();
-		static const LanguageDefinition& Glsl();
-		static const LanguageDefinition& Python();
-		static const LanguageDefinition& C();
-		static const LanguageDefinition& Sql();
-		static const LanguageDefinition& AngelScript();
-		static const LanguageDefinition& Lua();
-		static const LanguageDefinition& Cs();
-		static const LanguageDefinition& Json();
+        static const LanguageDefinition& Asm();
 	};
 
 	enum class UndoOperationType { Add, Delete };
