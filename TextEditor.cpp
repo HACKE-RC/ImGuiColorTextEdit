@@ -66,6 +66,9 @@ void TextEditor::SetLanguageDefinition(LanguageDefinitionId aValue)
         case LanguageDefinitionId::Asm:
             mLanguageDefinition = &(LanguageDefinition::Asm());
             break;
+        case LanguageDefinitionId::AsmArm:
+            mLanguageDefinition = &(LanguageDefinition::AsmArm());
+            break;
     }
 
     mRegexList.clear();
