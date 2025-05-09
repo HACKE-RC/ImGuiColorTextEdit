@@ -33,7 +33,7 @@ public:
 	};
 	enum class LanguageDefinitionId
 	{
-		None, Asm
+		None, Asm, AsmArm
 	};
 	enum class SetViewAtLineMode
 	{
@@ -310,6 +310,7 @@ private:
 		bool mCaseSensitive = true;
 
         static const LanguageDefinition& Asm();
+        static const LanguageDefinition& AsmArm();
 	};
 
 	enum class UndoOperationType { Add, Delete };
